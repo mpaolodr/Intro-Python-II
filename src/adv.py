@@ -1,4 +1,14 @@
 from room import Room
+from player import Player
+import textwrap
+import msvcrt
+
+
+# global vars
+
+#  for wrapping paragraphs of room description
+wrapper = textwrap.TextWrapper(width=50)
+
 
 # Declare all the rooms
 
@@ -38,13 +48,102 @@ room['treasure'].s_to = room['narrow']
 #
 
 # Make a new player object that is currently in the 'outside' room.
+new_player = Player("Tabby", room["outside"])
+
 
 # Write a loop that:
 #
-# * Prints the current room name
-# * Prints the current description (the textwrap module might be useful here).
-# * Waits for user input and decides what to do.
-#
+
+while True:
+
+    # user input
+    user_input = msvcrt.getwch().lower()
+    #  inputs list
+    allowed_inputs = ["w", "a", "s", "d", "q"]
+
+    # * Prints the current room name
+    # print(f"{room[new_player.current_room].name}")
+
+    # * Prints the current description (the textwrap module might be useful here).
+    # word_list = wrapper.wrap(text=room[new_player.current_room].description)
+    # for elem in word_list:
+    #     print(elem)
+
+    # * Waits for user input and decides what to do.
+
+    try:
+
+        if user_input in allowed_inputs:
+
+            if user_input == 'w':
+
+                if new_player.current_room.n_to != None:
+
+                    new_player.current_room = new_player.current_room.n_to
+                    print(new_player.current_room.name)
+
+                    # * Prints the current description (the textwrap module might be useful here).
+                    word_list = wrapper.wrap(
+                        text=new_player.current_room.description)
+                    for elem in word_list:
+                        print(elem)
+
+                else:
+                    print("No room in that direction")
+
+            elif user_input == 's':
+
+                if new_player.current_room.s_to != None:
+
+                    new_player.current_room = new_player.current_room.s_to
+                    print(new_player.current_room.name)
+
+                    # * Prints the current description (the textwrap module might be useful here).
+                    word_list = wrapper.wrap(
+                        text=new_player.current_room.description)
+                    for elem in word_list:
+                        print(elem)
+
+                else:
+                    print("No Room in that direction")
+
+            elif user_input == 'a':
+
+                if new_player.current_room.w_to != None:
+                    new_player.current_room = new_player.current_room.w_to
+                    print(new_player.current_room.name)
+
+                    # * Prints the current description (the textwrap module might be useful here).
+                    word_list = wrapper.wrap(
+                        text=new_player.current_room.description)
+                    for elem in word_list:
+                        print(elem)
+
+                else:
+                    print("No Room in that direction")
+
+            elif user_input == 'd':
+
+                if new_player.current_room.e_to != None:
+                    new_player.current_room = new_player.current_room.e_to
+                    print(new_player.current_room.name)
+
+                    # * Prints the current description (the textwrap module might be useful here).
+                    word_list = wrapper.wrap(
+                        text=new_player.current_room.description)
+                    for elem in word_list:
+                        print(elem)
+                else:
+                    print("No Room in that direction")
+
+            else:
+                print("Thanks for playing!")
+                break
+        else:
+            print("Input invalid. Only 'W'/'S'/'A'/'D'/'Q' are allowed")
+
+    except ValueError:
+        print("Input invalid. Only 'W'/'S'/'A'/'D'/'Q' are allowed")
 # If the user enters a cardinal direction, attempt to move to the room there.
 # Print an error message if the movement isn't allowed.
 #
