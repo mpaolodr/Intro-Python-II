@@ -1,4 +1,9 @@
 from room import Room
+from player import Player
+from item import Item
+import textwrap
+import msvcrt
+
 
 # Declare all the rooms
 
@@ -21,6 +26,17 @@ chamber! Sadly, it has already been completely emptied by
 earlier adventurers. The only exit is to the south."""),
 }
 
+# Declare all items
+items = {
+    "rock": Item("Rock", "hard object that can be used to inflict minimal damage"),
+    "wood": Item("Wooden Stick", "used with fire to create light inside caves"),
+    "bed": Item("Bed", "wooden frame with soft mattress used for sleeping"),
+    "blanket": Item("Blanket", "useless when warm"),
+    "telescope": Item("Telescope", "used to look at something from afar"),
+    "repellant": Item("Insect Repellant", "used to keep mosquitoes away"),
+    "gold": Item("Gold", "reason why people use stones to kill each other")
+}
+
 
 # Link rooms together
 
@@ -33,19 +49,102 @@ room['narrow'].w_to = room['foyer']
 room['narrow'].n_to = room['treasure']
 room['treasure'].s_to = room['narrow']
 
-#
-# Main
-#
+
+# Add items to rooms
+room['outside'].items = [items["rock"], items["wood"]]
+room['foyer'].items = [items["bed"], items["blanket"]]
+room['overlook'].items = [items["telescope"]]
+room['narrow'].items = [items["repellant"]]
+room['treasure'].items = [items["gold"]]
+
+
+# global vars
+
+#  for wrapping paragraphs of room description
+wrapper = textwrap.TextWrapper(width=50)
 
 # Make a new player object that is currently in the 'outside' room.
+new_player = Player("Tabby", room["outside"])
+
+# function to add items to players inventory
+
+
+def action(command, player):
+    command_list = command.split(" ")
+    if "get" in command_list and len(command_list) <= 2:
+
+        if command_list[1] in [item.name.lower() for item in player.current_room.items]:
+            player.inventory.append(items[command_list[1].lower()])
+            player.current_room.items.remove(items[command_list[1].lower()])
+            print(f"{command_list[1]} has been added to your inventory!")
+        else:
+            print("Item not available in this room")
+
+    elif "drop" in command_list and len(command_list) <= 2:
+
+        if command_list[1] in [item.name.lower() for item in player.inventory]:
+            player.inventory.remove(items[command_list[1].lower()])
+            player.current_room.items.append(items[command_list[1].lower()])
+            print(f"You dropped {command_list[1]}")
+        else:
+            print("You don't have that item")
+
+    elif command == "do nothing":
+        pass
+    else:
+        print("Command not valid")
+
+
+# function to take care of those repetitive code
+def room_exists(player, u_input):
+    direction = {"w": player.current_room.n_to, "s": player.current_room.s_to,
+                 "a": player.current_room.w_to, "d": player.current_room.e_to}
+
+    # If the user enters "q", quit the game.
+    if u_input == "q":
+        print("Thanks for playing!")
+        exit()
+
+    # If the user enters a cardinal direction, attempt to move to the room there.
+    if direction[u_input] != None:
+        player.current_room = direction[u_input]
+
+        # * Prints the current room name
+        print(f"Current Room: {player.current_room.name}")
+
+        # * Prints the current description (the textwrap module might be useful here).
+        word_list = wrapper.wrap(text=player.current_room.description)
+        for elem in word_list:
+            print(elem)
+
+        print("Items available: ")
+        for item in player.current_room.items:
+            print(f" {item.name}")
+
+        command_input = input("What do you want to do with these items? ")
+        action(command_input, player)
+
+    else:
+
+        print("No room in that direction")
+
+
+# Main
 
 # Write a loop that:
-#
-# * Prints the current room name
-# * Prints the current description (the textwrap module might be useful here).
-# * Waits for user input and decides what to do.
-#
-# If the user enters a cardinal direction, attempt to move to the room there.
-# Print an error message if the movement isn't allowed.
-#
-# If the user enters "q", quit the game.
+while True:
+
+    # user input
+    user_input = msvcrt.getwch().lower()
+    #  inputs list
+    allowed_inputs = ["w", "a", "s", "d", "q"]
+
+    # * Waits for user input and decides what to do.
+    if user_input in allowed_inputs:
+
+        room_exists(new_player, user_input)
+        continue
+
+    else:
+        # Print an error message if the movement isn't allowed.
+        print("Input invalid. Only 'W'/'S'/'A'/'D'/'Q' are allowed")
