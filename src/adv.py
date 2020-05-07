@@ -66,6 +66,34 @@ wrapper = textwrap.TextWrapper(width=50)
 # Make a new player object that is currently in the 'outside' room.
 new_player = Player("Tabby", room["outside"])
 
+# function to add items to players inventory
+
+
+def action(command, player):
+    command_list = command.split(" ")
+    if "get" in command_list and len(command_list) <= 2:
+
+        if command_list[1] in [item.name.lower() for item in player.current_room.items]:
+            player.inventory.append(items[command_list[1].lower()])
+            player.current_room.items.remove(items[command_list[1].lower()])
+            print(f"{command_list[1]} has been added to your inventory!")
+        else:
+            print("Item not available in this room")
+
+    elif "drop" in command_list and len(command_list) <= 2:
+
+        if command_list[1] in [item.name.lower() for item in player.inventory]:
+            player.inventory.remove(items[command_list[1].lower()])
+            player.current_room.items.append(items[command_list[1].lower()])
+            print(f"You dropped {command_list[1]}")
+        else:
+            print("You don't have that item")
+
+    elif command == "do nothing":
+        pass
+    else:
+        print("Command not valid")
+
 
 # function to take care of those repetitive code
 def room_exists(player, u_input):
@@ -87,19 +115,21 @@ def room_exists(player, u_input):
         # * Prints the current description (the textwrap module might be useful here).
         word_list = wrapper.wrap(text=player.current_room.description)
         for elem in word_list:
-            print(f"Description: {elem}")
+            print(elem)
 
-        item_list = player.current_room.items
+        print("Items available: ")
+        for item in player.current_room.items:
+            print(f" {item.name}")
 
-        for item in item_list:
-            print(item.name)
+        command_input = input("What do you want to do with these items? ")
+        action(command_input, player)
 
     else:
 
         print("No room in that direction")
 
-# Main
 
+# Main
 
 # Write a loop that:
 while True:
